@@ -1,62 +1,86 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-require('dotenv').config();
+// ✅ MIDDLEWARE
+app.use(cors({
+  origin: "*", // allow all (safe for now)
+  methods: ["GET","POST"],
+  allowedHeaders: ["Content-Type"]
+}));
 
+app.use(express.json());
+
+// ✅ CONNECT MONGODB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.log(err));
+  .catch(err => console.log("Mongo Error:", err));
 
+// ✅ TEST ROUTE
 app.get('/', (req, res) => {
   res.send('Kathi King Backend Running 🚀');
 });
 
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
-});
-
+// ✅ IMPORT MODEL
 const User = require('./models/User');
 
-// SIGNUP API
+
+// ================== SIGNUP ==================
 app.post('/signup', async (req, res) => {
   try {
+    console.log("Signup request:", req.body);
+
     const { name, email, password } = req.body;
 
-    // check if user already exists
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
     const existing = await User.findOne({ email });
+
     if (existing) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // create new user
     const user = new User({ name, email, password });
     await user.save();
 
-    res.json({ message: 'User created successfully' });
+    // ✅ IMPORTANT: return user (frontend needs this)
+    res.json({
+      message: 'Signup successful',
+      user: {
+        name: user.name,
+        email: user.email
+      }
+    });
 
   } catch (err) {
+    console.log("Signup Error:", err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// LOGIN API
+
+// ================== LOGIN ==================
 app.post('/login', async (req, res) => {
   try {
+    console.log("Login request:", req.body);
+
     const { email, password } = req.body;
 
-    // find user
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
     }
 
-    // check password
     if (user.password !== password) {
       return res.status(400).json({ message: 'Invalid password' });
     }
@@ -66,11 +90,20 @@ app.post('/login', async (req, res) => {
       user: {
         name: user.name,
         email: user.email,
-        orders: user.orders
+        orders: user.orders || 0
       }
     });
 
   } catch (err) {
+    console.log("Login Error:", err);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+
+// ✅ START SERVER
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
