@@ -26,6 +26,7 @@ app.get('/', (req, res) => {
 
 // ✅ IMPORT MODEL
 const User = require('./models/User');
+const Order = require('./models/Order');
 
 
 // ================== SIGNUP ==================
@@ -106,4 +107,73 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// CREATE ORDER
+app.post('/create-order', async (req,res)=>{
+
+  try{
+
+    const { userEmail, userName, items, total } = req.body;
+
+    if(!userEmail || !items || !items.length){
+      return res.status(400).json({
+        message:"Invalid order data"
+      });
+    }
+
+    const order = new Order({
+      userEmail,
+      userName,
+      items,
+      total
+    });
+
+    await order.save();
+
+    res.json({
+      message:"Order placed successfully",
+      order
+    });
+
+  }catch(err){
+
+    console.log(err);
+
+    res.status(500).json({
+      message:"Server error"
+    });
+
+  }
+
+});
+// CHECKOUT API
+app.post('/checkout', async (req, res) => {
+
+  try {
+
+    const { userEmail, items, total } = req.body;
+
+    console.log("Checkout request:", req.body);
+
+    if (!userEmail || !items || !total) {
+      return res.status(400).json({
+        message: "Missing checkout data"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Order placed successfully"
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      message: "Server error"
+    });
+  }
+
 });
