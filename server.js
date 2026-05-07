@@ -199,6 +199,77 @@ app.post('/create-order', async (req, res) => {
 
 });
 
+// ================= GET ALL ORDERS =================
+app.get('/orders', async (req,res)=>{
+
+  try{
+
+    const orders = await Order.find().sort({createdAt:-1});
+
+    res.json(orders);
+
+  }catch(err){
+
+    console.log(err);
+
+    res.status(500).json({
+      message:'Server error'
+    });
+  }
+
+});
+
+
+// ================= UPDATE STATUS =================
+app.put('/orders/:id', async (req,res)=>{
+
+  try{
+
+    await Order.findByIdAndUpdate(req.params.id,
+    {
+      status:'Delivered'
+    });
+
+    res.json({
+      message:'Order delivered successfully'
+    });
+
+  }catch(err){
+
+    console.log(err);
+
+    res.status(500).json({
+      message:'Server error'
+    });
+
+  }
+
+});
+
+
+// ================= DELETE ORDER =================
+app.delete('/orders/:id', async (req,res)=>{
+
+  try{
+
+    await Order.findByIdAndDelete(req.params.id);
+
+    res.json({
+      message:'Order deleted successfully'
+    });
+
+  }catch(err){
+
+    console.log(err);
+
+    res.status(500).json({
+      message:'Server error'
+    });
+
+  }
+
+});
+
 
 // ================= START SERVER =================
 

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const orderSchema = new mongoose.Schema({
+const OrderSchema = new mongoose.Schema({
 
   userEmail:{
     type:String,
@@ -15,8 +15,8 @@ const orderSchema = new mongoose.Schema({
   items:[
     {
       name:String,
-      price:Number,
-      quantity:Number
+      qty:Number,
+      price:Number
     }
   ],
 
@@ -27,14 +27,11 @@ const orderSchema = new mongoose.Schema({
 
   status:{
     type:String,
-    default:"Preparing"
-  },
-
-  createdAt:{
-    type:Date,
-    default:Date.now
+    default:'Pending'
   }
 
+},{
+  timestamps:true
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model('Order', OrderSchema);
