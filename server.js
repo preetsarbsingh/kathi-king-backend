@@ -309,7 +309,62 @@ app.post("/create-payment-order", async (req,res)=>{
 
 });
 
+// GET ALL ORDERS
 
+app.get("/orders", async (req,res)=>{
+
+  try{
+
+    const orders =
+      await Order.find()
+      .sort({ createdAt:-1 });
+
+    res.json(orders);
+
+  }catch(err){
+
+    console.log(err);
+
+    res.status(500).json({
+      message:"Failed to fetch orders"
+    });
+
+  }
+
+});
+
+// UPDATE ORDER STATUS
+
+app.post("/update-order-status", async (req,res)=>{
+
+  try{
+
+    const { orderId, status } = req.body;
+
+    const order =
+      await Order.findByIdAndUpdate(
+
+        orderId,
+
+        { status },
+
+        { new:true }
+
+      );
+
+    res.json(order);
+
+  }catch(err){
+
+    console.log(err);
+
+    res.status(500).json({
+      message:"Status update failed"
+    });
+
+  }
+
+});
 // ✅ START SERVER
 const PORT = process.env.PORT || 3000;
 

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const OrderSchema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema({
 
   userEmail:{
     type:String,
@@ -15,8 +15,8 @@ const OrderSchema = new mongoose.Schema({
   items:[
     {
       name:String,
-      qty:Number,
-      price:Number
+      price:Number,
+      quantity:Number
     }
   ],
 
@@ -25,13 +25,22 @@ const OrderSchema = new mongoose.Schema({
     required:true
   },
 
+  paymentId:{
+    type:String,
+    default:""
+  },
+
   status:{
     type:String,
-    default:'Pending'
+    default:"Placed"
+  },
+
+  createdAt:{
+    type:Date,
+    default:Date.now
   }
 
-},{
-  timestamps:true
 });
 
-module.exports = mongoose.model('Order', OrderSchema);
+module.exports =
+  mongoose.model("Order", orderSchema);
