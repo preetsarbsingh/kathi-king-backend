@@ -1,10 +1,14 @@
+const Razorpay = require("razorpay");
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 // ================= MIDDLEWARE =================
 
@@ -271,8 +275,42 @@ app.delete('/orders/:id', async (req,res)=>{
 });
 
 
-// ================= START SERVER =================
+// ================= PAYMENT ORDER =================
 
+app.post("/create-payment-order", async (req,res)=>{
+
+  try{
+
+    const { total } = req.body;
+
+    const options = {
+
+      amount: total * 100,
+
+      currency: "INR",
+
+      receipt: "order_rcptid_" + Date.now()
+
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json(order);
+
+  }catch(err){
+
+    console.log(err);
+
+    res.status(500).json({
+      message:"Payment order failed"
+    });
+
+  }
+
+});
+
+
+// ✅ START SERVER
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
